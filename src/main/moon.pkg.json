@@ -1,6 +1,6 @@
 {
   "is-main": true,
   "import": [
-    "CAIMEOX/hazelnut/lib"
+    "CAIMEOX/cratere/lib"
   ]
 }

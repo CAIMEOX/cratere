@@ -62,6 +62,14 @@ pub fn synthesis(self : HExp, ctx : Context) -> HTyp!TypeError {
   }
 }
 
+pub fn synthesis_(self : HExp, ctx : Context) -> HTyp!ActionError {
+  try {
+    self.synthesis!(ctx)
+  } catch {
+    TypeError(x) => raise ActionError("TypeError: " + x)
+  }
+}
+
 pub fn check(self : HExp, ctx : Context, typ : HTyp) -> Unit!TypeError {
   match self {
     Lam(var, e) =>
@@ -99,7 +107,15 @@ pub fn check(self : HExp, ctx : Context, typ : HTyp) -> Unit!TypeError {
   }
 }
 
-pub fn is_complete(self: HExp) -> Bool {
+pub fn check_(self : HExp, ctx : Context, typ : HTyp) -> Unit!ActionError {
+  try {
+    self.check!(ctx, typ)
+  } catch {
+    TypeError(x) => raise ActionError("TypeError: " + x)
+  }
+}
+
+pub fn is_complete(self : HExp) -> Bool {
   match self {
     Var(_) | Lit(_) => true
     App(e1, e2) => e1.is_complete() && e2.is_complete()
