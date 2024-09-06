@@ -1,17 +1,17 @@
 typealias Var = String
 
 struct Context {
-  ctx : @immut/sorted_map.T[Var, HTyp]
+  ctx : @immut/hashmap.T[Var, HTyp]
 }
 
 pub fn empty() -> Context {
-  { ctx: @immut/sorted_map.empty() }
+  { ctx: @immut/hashmap.new() }
 }
 
 pub fn extend(self : Context, var : Var, typ : HTyp) -> Context {
   match self.ctx[var] {
     Some(_) => self
-    None => { ctx: self.ctx.insert(var, typ) }
+    None => { ctx: self.ctx.add(var, typ) }
   }
 }
 
