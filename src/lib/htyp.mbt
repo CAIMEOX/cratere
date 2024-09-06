@@ -68,6 +68,10 @@ pub fn to_string(self : HTyp) -> String {
     Num => "Num".to_string()
     Arrow(t1, t2) => "(" + t1.to_string() + " -> " + t2.to_string() + ")"
     Sum(t1, t2) => "(" + t1.to_string() + " + " + t2.to_string() + ")"
-    Hole => "?".to_string()
+    Hole => "?"
   }
+}
+
+pub fn output(self : HTyp, logger : Logger) -> Unit {
+  logger.write_string(self.to_string())
 }
