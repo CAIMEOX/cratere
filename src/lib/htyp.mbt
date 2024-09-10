@@ -71,3 +71,7 @@ pub fn to_string(self : HTyp) -> String {
     Hole => "?".to_string()
   }
 }
+
+pub fn output(self : HTyp, logger : Logger) -> Unit {
+  logger.write_string(self.to_string())
+}
