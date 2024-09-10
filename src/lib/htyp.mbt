@@ -66,8 +66,8 @@ pub fn is_complete(self : HTyp) -> Bool {
 pub fn to_string(self : HTyp) -> String {
   match self {
     Num => "Num".to_string()
-    Arrow(t1, t2) => "(" + t1.to_string() + " -> " + t2.to_string() + ")"
-    Sum(t1, t2) => "(" + t1.to_string() + " + " + t2.to_string() + ")"
+    Arrow(t1, t2) => "\{t1} -> \{t2}"
+    Sum(t1, t2) => "\{t1} + \{t2}"
     Hole => "?".to_string()
   }
 }

@@ -3,6 +3,13 @@ enum Direction {
   Parent
 }
 
+pub fn to_string(self : Direction) -> String {
+  match self {
+    Child(i) => "child(\{i})"
+    Parent => "parent"
+  }
+}
+
 enum Shape {
   ArrowS
   AscS
@@ -18,11 +25,37 @@ enum Shape {
   NeHole
 }
 
+pub fn to_string(self : Shape) -> String {
+  match self {
+    ArrowS => "arrow"
+    AscS => "asc"
+    NumS => "num"
+    SumS => "sum"
+    VarS(x) => "var(\{x})"
+    LamS(x) => "lam(\{x})"
+    AppS => "app"
+    LitS(n) => "lit(\{n})"
+    PlusS => "plus"
+    InjS(t) => "inj(\{t})"
+    CaseS(x, y) => "case(\{x}, \{y})"
+    NeHole => "non-empty-hole"
+  }
+}
+
 enum Action {
   Move(Direction)
   Construct(Shape)
   Delete
   Finish
+}
+
+pub fn to_string(self : Action) -> String {
+  match self {
+    Move(d) => "move \{d}"
+    Construct(s) => "construct \{s}"
+    Delete => "delete"
+    Finish => "finish"
+  }
 }
 
 type! ActionError String
@@ -54,7 +87,7 @@ pub fn run_action(self : ZTyp, act : Action) -> ZTyp!ActionError {
   }
 }
 
-pub fn run_action(self : ZExp, act : Action) -> ZExp!ActionError {
+pub fn run_move(self : ZExp, act : Action) -> ZExp!ActionError {
   match act {
     Move(direction) =>
       match (direction, self) {
@@ -106,7 +139,7 @@ pub fn synthesis_action(
 ) -> (ZExp, HTyp)!ActionError {
   let (ze, ty) = zt
   try {
-    (ze.run_action!(self), ty)
+    (ze.run_move!(self), ty)
   } catch {
     ActionError(_) =>
       match (self, zt) {
@@ -193,7 +226,7 @@ pub fn synthesis_action(
         (x, (NonEmptyHole(ebar), _)) => {
           let ebare = ebar.erase()
           let ty = ebare.synthesis_!(ctx)
-          (synthesis_action!(x, ctx, (ebar, ty)).0, Hole)
+          (synthesis_action!(x, ctx, (ebar, ty)).0 |> NonEmptyHole, Hole)
         }
         _ => raise ActionError("Invalid action")
       }
@@ -318,10 +351,54 @@ pub fn check_action(
   match self {
     Move(_) =>
       try {
-        ze.run_action!(self)
+        ze.run_move!(self)
       } catch {
         ActionError(_) => self.check_post_action!(ctx, ze, ty)
       }
     _ => self.check_post_action!(ctx, ze, ty)
   }
+}
+
+pub fn perform_action(
+  actions : Array[Action],
+  ~ctx : Context = Context::empty()
+) -> Unit!ActionError {
+  let mut exp : (ZExp, HTyp) = (CursorHExp(Hole), Hole)
+  for i = 0; i < actions.length(); i = i + 1 {
+    exp = actions[i].synthesis_action!(ctx, exp)
+    println("\{actions[i]}: \{exp.0}")
+  }
+}
+
+test "" {
+  let actions = [
+    Construct(LamS("x")),
+    Construct(NumS),
+    Move(Parent),
+    Move(Child(2)),
+    Construct(NumS),
+    Move(Parent),
+    Move(Parent),
+    Move(Child(1)),
+    Move(Child(1)),
+    Construct(VarS("x")),
+    Construct(PlusS),
+    Construct(LitS(1)),
+  ]
+  perform_action!(actions)
+}
+
+test "" {
+  let ctx = Context::empty().extend("incr", Arrow(Num, Num))
+  let actions = [
+    Construct(VarS("incr")),
+    Construct(AppS),
+    Construct(VarS("incr")),
+    Construct(AppS),
+    Construct(LitS(3)),
+    Move(Parent),
+    Move(Parent),
+    Finish,
+  ]
+  perform_action!(actions, ~ctx)
 }

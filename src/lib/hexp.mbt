@@ -1,7 +1,7 @@
 enum SumTag {
   Left
   Right
-} derive(Eq)
+} derive(Eq, Show)
 
 pub fn run_sum[T](self : SumTag, l : T, r : T) -> T {
   match self {
@@ -21,6 +21,22 @@ enum HExp {
   Case(HExp, (Var, HExp), (Var, HExp))
   NonEmptyHole(HExp)
   Hole
+}
+
+pub fn to_string(self :HExp) -> String {
+  match self {
+    Var(v) => v
+    App(e1, e2) => "\{e1}(\{e2})"
+    Lam(v, e) => "λ\{v}. \{e}"
+    Asc(e, t) => "\{e} : \{t}"
+    Lit(n) => n.to_string()
+    Plus(e1, e2) => "\{e1} + \{e2}"
+    Inj(tag, e) => tag.run_sum("inl", "inr") + " \{e}"
+    Case(e, (x1, e1), (x2, e2)) =>
+      "case \{e} of inl \{x1} => \{e1} | inr \{x2} => \{e2}"
+    NonEmptyHole(e) => "[\{e}]"
+    Hole => "?"
+  }
 }
 
 type! TypeError String

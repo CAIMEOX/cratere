@@ -4,7 +4,7 @@ struct Context {
   ctx : @immut/sorted_map.T[Var, HTyp]
 }
 
-pub fn empty() -> Context {
+pub fn Context::empty() -> Context {
   { ctx: @immut/sorted_map.empty() }
 }
 

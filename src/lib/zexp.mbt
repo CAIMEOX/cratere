@@ -14,6 +14,27 @@ enum ZExp {
   NonEmptyHole(ZExp)
 }
 
+pub fn to_string(self : ZExp) -> String {
+  match self {
+    CursorHExp(x) => ">\{x}<"
+    ValAsc(ze, ht) => "\{ze} : \{ht}"
+    TypAsc(he, zt) => "\{he} : \{zt}"
+    Lam(x, ze) => "λ\{x}. \{ze}"
+    LeftApp(ze, he) => "\{ze}(\{he})"
+    RightApp(he, ze) => "\{he}(\{ze})"
+    LeftPlus(ze, he) => "\{ze} + \{he}"
+    RightPlus(he, ze) => "\{he} + \{ze}"
+    Inj(t, ze) => t.run_sum("inl", "inr") + " \{ze}"
+    Case0(ze, (x1, he1), (x2, he2)) =>
+      "case \{ze} of inl \{x1} => \{he1} | inr \{x2} => \{he2}"
+    CaseL(he, (x, ze1), (y, he2)) =>
+      "case \{he} of inl \{x} => \{ze1} | inr \{y} => \{he2}"
+    CaseR(he, (x, he1), (y, ze2)) =>
+      "case \{he} of inl \{x} => \{he1} | inr \{y} => \{ze2}"
+    NonEmptyHole(ze) => "[\{ze}]"
+  }
+}
+
 pub fn erase(self : ZExp) -> HExp {
   match self {
     CursorHExp(h) => h
